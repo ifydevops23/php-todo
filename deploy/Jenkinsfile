@@ -1,49 +1,34 @@
-   pipeline {
+pipeline {
     agent any
 
 
   stages {
-    stage('Build') {
-      steps {
-        script {
-          sh 'echo "Building Stage"'
+
+
+     stage("Initial cleanup") {
+          steps {
+            dir("${WORKSPACE}") {
+              deleteDir()
+            }
+          }
         }
+
+
+    stage('Checkout SCM') {
+      steps {
+            git branch: 'main', url: 'https://github.com/ifydevops23/php-todo.git'
       }
     }
 
 
-    stage('Test') {
+    stage('Prepare Dependencies') {
       steps {
-        script {
-          sh 'echo "Testing Stage"'
-        }
+             sh 'mv .env.sample .env'
+             sh 'composer install'
+             sh 'php artisan migrate'
+             sh 'php artisan db:seed'
+             sh 'php artisan key:generate'
       }
     }
-
-    stage('Package') {
-      steps {
-        script {
-          sh 'echo "Packaging Stage"'
-        }
-      }
-    }
-     
-    stage('Deploy') {
-      steps {
-        script {
-          sh 'echo "Deployment Stage"'
-        }
-      }
-    }
-
-    stage('Clean-Up') {
-      steps {
-        script {
-          sh 'echo "Clean-up Stage"'
-        }
-      }
-    }
-   
-      
-    }
+  }
 }
